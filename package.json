@@ -1,0 +1,36 @@
+{
+  "name": "vision",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "react-native run-android",
+    "log": "react-native log-android",
+    "log:win": "%ANDROID_HOME%\\platform-tools\\adb.exe logcat -c",
+    "start": "node server/index.js",
+    "start:rn": "react-native start",
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@google-cloud/vision": "^1.2.0",
+    "axios": "^0.19.0",
+    "express": "^4.17.1",
+    "express-fileupload": "^1.1.5",
+    "react": "16.8.6",
+    "react-native": "0.60.5",
+    "react-native-image-picker": "^1.0.2"
+  },
+  "devDependencies": {
+    "@babel/core": "7.5.5",
+    "@babel/runtime": "7.5.5",
+    "@react-native-community/eslint-config": "0.0.3",
+    "babel-jest": "24.9.0",
+    "eslint": "6.2.2",
+    "jest": "24.9.0",
+    "metro-react-native-babel-preset": "0.54.1",
+    "react-test-renderer": "16.8.6"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}
