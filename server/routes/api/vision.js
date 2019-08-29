@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const dotenv = require('dotenv');
-// const env = require('../../../config/env');
 
 dotenv.config();
 
@@ -9,14 +8,14 @@ async function getImageAnnotations(imgUri) {
   const vision = require('@google-cloud/vision');
 
   // Creates a client
-  // If running on Google App Engine (Application Default Credentials would apply)
+  // When running on Google App Engine (Application Default Credentials would apply) if `env_variables` no in `app.yaml`
   const client = new vision.ImageAnnotatorClient({
-    projectId:  process.env.GOOGLE_APPLICATION_CREDENTIALS.projectId,
+    projectId: process.env.PROJECT_ID,
     credentials: {
-      private_key: process.env.GOOGLE_APPLICATION_CREDENTIALS.private_key,
-      client_email: process.env.GOOGLE_APPLICATION_CREDENTIALS.client_email
+      private_key: process.env.PRIVATE_KEY.replace(/\\n/g,'\n'), //globally matches and replaces endlines
+      client_email: process.env.CLIENT_EMAIL
     }
-   });
+  });
 
   // Performs WEB_DETECTION on the image file
   const [result] = await client.webDetection(imgUri);
@@ -32,9 +31,9 @@ async function getImageAnnotations(imgUri) {
 // `/api/vision`
 router.post('/', async (req, res, next) => {
   try{
-    // const label = await getImageAnnotations();
-    // const labels = await getImageAnnotations("http://images-gmi-pmc.edge-generalmills.com/df111eed-4d6a-44f7-8d8f-80d41f7ee1d6.jpg");
-    res.send([req.body]);
+    // const label = await getImageAnnotations(req.files.);
+    const labels = await getImageAnnotations("http://images-gmi-pmc.edge-generalmills.com/df111eed-4d6a-44f7-8d8f-80d41f7ee1d6.jpg");
+    res.send(labels);
   }
   catch(err){
     next(err);

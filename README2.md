@@ -53,7 +53,7 @@ gcloud auth list
 ```
 
 # Server Setup
-## Initialize a Google Cloud App Engine with Node.js 
+## Initialize a Google Cloud App Engine
 The [Google Cloud App Engine](https://cloud.google.com/appengine/docs/nodejs/) is similar to [Heroku](https://www.heroku.com/) in that they each serve as a <abbr title="Platform-as-a-Service">PaaS</abbr> for [Node.js](https://nodejs.org/en/docs/guides/).
 
 In order to [setup Node.js](https://cloud.google.com/nodejs/docs/setup) on the <abbr title='Google App Engine'>GAE</abbr>, we first have to create an App Engine application in our Google project.
@@ -63,15 +63,19 @@ In order to [setup Node.js](https://cloud.google.com/nodejs/docs/setup) on the <
 gcloud app create --project=vision-to-graph
 ```
 
-### Node.js and Google Cloud Storage Alternatives
-There are several [alternatives](https://cloud.google.com/community/tutorials/running-nodejs-on-google-cloud) to GAE for running Node.js.
+### Google Cloud Storage
+There are several [storage options](https://cloud.google.com/community/tutorials/running-nodejs-on-google-cloud) to use with a Node.js app. This project uses [buckets](https://cloud.google.com/appengine/docs/standard/nodejs/using-cloud-storage) in Google Cloud Storage to store **uploaded image data**.
 
-#### Ex: Google Cloud Storage
-After installing the Google Cloud SDK locally, the CLI command that allowed this app to *make buckets*, for instance, is: 
+After installing the Google Cloud SDK locally, use the CLI to *make buckets*. 
 
 ```bash
 #gsutil mb gs://REQUESTED_GLOBALLY_UNIQUE_BUCKET_NAME
 gsutil mb gs://vision-img
+```
+
+>[Note] To makde a bucket *publicly readable* in order serve files:
+```bash
+gsutil defacl set public-read gs://[YOUR_BUCKET_NAME]
 ```
 
 ## Configure App Engine Credentials to Authenticate Client
@@ -79,8 +83,21 @@ Using a *service* account for GCP project, rather than a user account, authorize
 
 >If a `new`ly-constructed *object* from a newly-`import`ed *constructor* from the `@google-cloud/`[*CLIENT_LIBRARY*](https://cloud.google.com/nodejs/docs/reference/libraries), is called without [credentials](https://cloud.google.com/docs/authentication/getting-started#auth-cloud-implicit-nodejs), then the constuctor function will look for credentials in the environment automatically (i.e., *Application Default Credentials*)
 
-## Configure App Engine Permissions to Authorize Client's Intentions
+### Configure the App Engine Environment
+```bash
+npm i dotenv
+```
 
+```txt
+<!-- .env -->
+PROJECT_ID=...
+PRIVATE_KEY=...
+CLIENT_EMAIL=...
+```
+
+```javascript
+require('dotenv').config() //allowing use of process.env._____ when the `.env` is available or `env_variables: [envName]:[envVal]`
+```
 
 # Google APIs
 ## Enable APIs for Project in GCP
@@ -96,9 +113,21 @@ npm i -D @google-cloud/vision
 ```
 
 # Deploying an Express App to Route HTTP Requests to Listeners that Respond.
-The following command deploys any Node.js web application to the App Engine standard environment. After deployment App Engine attempts to start the app with npm start.
+You need an `app.yaml` file at the root of your app to [deploy](https://cloud.google.com/appengine/docs/standard/nodejs/building-app/deploying-web-service) your service to App Engine.
+
+```yaml
+# app.yaml
+runtime: nodejs
+env: flex
+```
+
+The following command deploys a Node.js web application to the App Engine standard environment. 
+
 ```bash
 gcloud app deploy
 ```
+
+After deployment App Engine runs `npm start`.
+
 # Create APK from Gradle files to also deploy Android App
 # Make download link

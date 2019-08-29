@@ -37,12 +37,9 @@ class App extends Component {
   constructor(){
     super();
     this.state = {
-      isUploading: false,
-      imageSource: {},
-      imageUri: '',
+      image: {},
       imageBase64Data: '',
-      visionLabels: [],
-      nutrition: null
+      visionLabels: []
     };
   }
   
@@ -53,8 +50,11 @@ class App extends Component {
       console.log('ImagePicker Error: ', response.error);
     } else {
       this.setState({
-        imageSource: response,
-        imageUri: response.uri, 
+        image: {
+          uri: response.uri,
+          type: 'image/jpeg', 
+          name: `image-${Date.now()}.jpg`
+        },
         imageBase64Data: response.data,
       });
     }
@@ -62,64 +62,25 @@ class App extends Component {
 
   submitToGoogle = async () => {
     try {
-      let {imageUri, imageBase64Data} = this.state;
+      const url = 'https://vision-to-graph.appspot.com/api/vision';
 
-      let body = JSON.stringify({
-        requests: [{
-          image: {
-            content: imageBase64Data
-          },
-          features: [
-            {type: "WEB_DETECTION", maxResults: 3}
-            // {type: "TEXT_DETECTION", maxResults: 3},
-            // {type: "DOCUMENT_TEXT_DETECTION", maxResults: 3},
-            //{type: "LABEL_DETECTION", maxResults: 6},
-          ]
-        }]
-      })
-
-/*       //ATTEMPT 1
-      let res = await axios.post(`https://127.0.0.1:3000/api/vision`, {
-        data: imageBase64Data
-      }); */
-
-      // ATTEMPT 2
       const formData = new FormData();
-      formData.append('image', {uri: imageUri, type: 'image/jpeg'})
+      formData.append('image', this.state.image)
       
-      // let {data} = await axios.post(`https://127.0.0.1:3000/api/vision`, {...formData});
-      let data = await axios.get('https://jsonplaceholder.typicode.com/todos/1')
+      let {data} = await axios({
+        url,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Accept': 'application/json'
+        },
+        body: formData
+      });
+
       this.setState({visionLabels: data})
-/* 
-      //Attemp 3
-      async function uploadImageAsync(uri) {
-        const blob = await new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
-          xhr.onload = function() {
-            resolve(xhr.response);
-          };
-          xhr.onerror = function(e) {
-            console.log(e);
-            reject(new TypeError('Network request failed'));
-          };
-          xhr.responseType = 'blob';
-          xhr.open('GET', uri, true);
-          xhr.send(null);
-        });
-      
-        const ref = firebase
-          .storage()
-          .ref()
-          .child(uuid.v4());
-        const snapshot = await ref.put(blob);
-      
-        blob.close();
-      
-        return await snapshot.ref.getDownloadURL();
-      }*/
 
     } catch (err) {
-      console.warn(err);
+      console.error(err);
     } 
   }; 
 
@@ -130,7 +91,7 @@ class App extends Component {
   } */
 
   render() {
-    const {imageUri, imageBase64Data, visionLabels} = this.state;
+    const {image, imageBase64Data, visionLabels} = this.state;
     const {
       scrollView, 
       body, 
@@ -160,14 +121,14 @@ class App extends Component {
                 <Text style={{fontSize:18}}>ImagePicker</Text>
               </TouchableOpacity>
               {/* Could use
-                <Image source={{ uri:`imageUri`}} style={styles.image}/> 
+                <Image source={{ uri:`image.uri`}} style={styles.image}/> 
               but knowing you can input encoded data into source is cooler*/}
               <Image source={{ uri:`data:image/jpeg;base64,${imageBase64Data}`}} 
               style={styles.image}/>
             </View>
             {
               <View>
-                <Text>{imageUri}</Text>
+                <Text>{image.uri}</Text>
               </View>
             }
             <View style={sectionContainer}>
@@ -178,11 +139,13 @@ class App extends Component {
                 </TouchableOpacity></>
               : <></>
             }
+            <></>
             {
-              // visionLabels.length 
-              visionLabels
+              Array.isArray(visionLabels)
               ? visionLabels.map(label => 
-                <TouchableOpacity onPress={() => alert("Not linked to anything yet")} style={button}>{JSON.stringify(visionLabels)}</TouchableOpacity>) 
+                <TouchableOpacity key={label} onPress={() => alert("Not linked to anything yet")} style={button}>
+                  <Text>{JSON.stringify(visionLabels)}</Text>
+                </TouchableOpacity>) 
               :<></>
             }
             </View>
@@ -220,6 +183,7 @@ const styles = StyleSheet.create({
     color: Colors.lighter
   }, 
   button: {
+    marginVertical: 8,
     flexDirection: 'column',
     alignItems: 'center',
     backgroundColor:'dodgerblue', 
