@@ -1,10 +1,10 @@
 const express = require('express');
-// const dotenv = require('dotenv');
+const dotenv = require('dotenv');
 const path = require('path');
 const fileUpload = require('express-fileupload');
 const visionRoute = require('./routes/api/vision');
 
-// dotenv.config();
+dotenv.config();
 const port = process.env.PORT || 3000;
 
 const app = express();

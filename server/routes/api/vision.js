@@ -1,6 +1,8 @@
 const router = require('express').Router();
-const path = require('path');
-const env = require(path.join(__dirname, '../../../config/env'));
+const dotenv = require(dotenv);
+// const env = require('../../../config/env');
+
+dotenv.config();
 
 async function getImageAnnotations(imgUri) {
   // Imports the Google Cloud client library
@@ -9,10 +11,10 @@ async function getImageAnnotations(imgUri) {
   // Creates a client
   // If running on Google App Engine (Application Default Credentials would apply)
   const client = new vision.ImageAnnotatorClient({
-    projectId:  env.GOOGLE_APPLICATION_CREDENTIALS.projectId,
+    projectId:  process.env.GOOGLE_APPLICATION_CREDENTIALS.projectId,
     credentials: {
-      private_key: env.GOOGLE_APPLICATION_CREDENTIALS.private_key,
-      client_email: env.GOOGLE_APPLICATION_CREDENTIALS.client_email
+      private_key: process.env.GOOGLE_APPLICATION_CREDENTIALS.private_key,
+      client_email: process.env.GOOGLE_APPLICATION_CREDENTIALS.client_email
     }
    });
 
