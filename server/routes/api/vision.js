@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const dotenv = require(dotenv);
+const dotenv = require('dotenv');
 // const env = require('../../../config/env');
 
 dotenv.config();
