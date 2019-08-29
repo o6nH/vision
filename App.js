@@ -14,8 +14,7 @@ import {
   View,
   Text,
   Image,
-  TouchableOpacity,
-  ActivityIndicator
+  TouchableOpacity
 } from 'react-native';
 
 import {
@@ -24,6 +23,7 @@ import {
 
 import ImagePicker from 'react-native-image-picker';
 import axios from 'axios';
+// import * as firebase from 'firebase';
 
 const options = {
   title: 'Select an Image to Analyze',
@@ -38,9 +38,11 @@ class App extends Component {
     super();
     this.state = {
       isUploading: false,
+      imageSource: {},
       imageUri: '',
       imageBase64Data: '',
-      visionRes: {}
+      visionLabels: [],
+      nutrition: null
     };
   }
   
@@ -50,17 +52,13 @@ class App extends Component {
     } else if (response.error) {
       console.log('ImagePicker Error: ', response.error);
     } else {
-      this.uploadImage(response.uri)
       this.setState({
+        imageSource: response,
         imageUri: response.uri, 
-        imageBase64Data: response.data
+        imageBase64Data: response.data,
       });
     }
   });
-
-  uploadImage = async (imageUri) => {
-    
-  }
 
   submitToGoogle = async () => {
     try {
@@ -80,41 +78,59 @@ class App extends Component {
         }]
       })
 
-      //ATTEMPT 1
-      // let res = await axios.post(`https://127.0.0.1:3000/api/vision`, {
-      //   data: imageBase64Data
-      // });
-
-      //ATTEMPT 2
-      // const imageData = new FormData();
-      // imageData.append('image[images_attributes[0][file]]', {uri: imageUri, type: 'image/jpeg'})
-      //
-      // let res = await fetch(`https://127.0.0.1:3000/api/vision`,{
-      //   method: 'post',
-      //   headers: {
-      //     'Content-Type': 'multipart/form-data',
-      //   },
-      //   body: imageData
-      // });
-
-      //ATTEMPT 3
-      /* let res = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${env.GOOGLE_CLOUD_VISION_API_KEY}`, {
-        header: {
-          Accept: "application/json", 
-          "Content-Type": "appilcation/json"
-        },
-        method: 'POST',
-        body
+/*       //ATTEMPT 1
+      let res = await axios.post(`https://127.0.0.1:3000/api/vision`, {
+        data: imageBase64Data
       }); */
 
-      this.setState({visionRes: res})//.responses.webDetection.webEntities.bestGuessLabels.label})
+      // ATTEMPT 2
+      const formData = new FormData();
+      formData.append('image', {uri: imageUri, type: 'image/jpeg'})
+      
+      // let {data} = await axios.post(`https://127.0.0.1:3000/api/vision`, {...formData});
+      let data = await axios.get('https://jsonplaceholder.typicode.com/todos/1')
+      this.setState({visionLabels: data})
+/* 
+      //Attemp 3
+      async function uploadImageAsync(uri) {
+        const blob = await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.onload = function() {
+            resolve(xhr.response);
+          };
+          xhr.onerror = function(e) {
+            console.log(e);
+            reject(new TypeError('Network request failed'));
+          };
+          xhr.responseType = 'blob';
+          xhr.open('GET', uri, true);
+          xhr.send(null);
+        });
+      
+        const ref = firebase
+          .storage()
+          .ref()
+          .child(uuid.v4());
+        const snapshot = await ref.put(blob);
+      
+        blob.close();
+      
+        return await snapshot.ref.getDownloadURL();
+      }*/
+
     } catch (err) {
       console.warn(err);
-    }
-  };
+    } 
+  }; 
+
+/*   getNutrition = (upc) => {
+    let {data} = await axios.get(`https://api.spoonacular.com/food/products/upc/${upc}`);
+
+    this.setState({nutrition: data.nutrition})
+  } */
 
   render() {
-    const {imageBase64Data, visionRes} = this.state;
+    const {imageUri, imageBase64Data, visionLabels} = this.state;
     const {
       scrollView, 
       body, 
@@ -149,6 +165,11 @@ class App extends Component {
               <Image source={{ uri:`data:image/jpeg;base64,${imageBase64Data}`}} 
               style={styles.image}/>
             </View>
+            {
+              <View>
+                <Text>{imageUri}</Text>
+              </View>
+            }
             <View style={sectionContainer}>
             { 
               imageBase64Data.length
@@ -158,10 +179,11 @@ class App extends Component {
               : <></>
             }
             {
-              visionRes ? <Text>{JSON.stringify(visionRes)}</Text> : <></>
-            }
-            {
-              this.state.isUploading && <ActivityIndicator/>
+              // visionLabels.length 
+              visionLabels
+              ? visionLabels.map(label => 
+                <TouchableOpacity onPress={() => alert("Not linked to anything yet")} style={button}>{JSON.stringify(visionLabels)}</TouchableOpacity>) 
+              :<></>
             }
             </View>
           </View>
