@@ -6,8 +6,8 @@
   },
   "private": true,
   "scripts": {
-    "postinstall": "",
-    "build": "react-native run-android",
+    "postinstall": "npm run start",
+    "build:app": "react-native run-android",
     "log": "react-native log-android",
     "log:win": "%ANDROID_HOME%\\platform-tools\\adb.exe logcat -c",
     "start": "node server/index.js",

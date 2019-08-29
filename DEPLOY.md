@@ -11,7 +11,7 @@ heroku git:remote -a [repo]
 ## Deploy local `dev` branch to remote Heroku `master` branch
 After pulling the most recent version of the `dev` branch from git, push to the new existing remote `master` branch on Heroku (with default alias of `heroku`).
 ```bash
-git push heroku [fromRepo]:[toRepo]
+git push heroku [fromBranch]:[toHerokuBranch]
 ```
 <!-- ​
 ## Seeding data
