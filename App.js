@@ -23,7 +23,6 @@ import {
 
 import ImagePicker from 'react-native-image-picker';
 import axios from 'axios';
-// import * as firebase from 'firebase';
 
 const options = {
   title: 'Select an Image to Analyze',
@@ -64,7 +63,7 @@ class App extends Component {
   submitToGoogle = async () => {
     try {
       const uploadUrl = 'https://vision-to-graph.appspot.com/api/vision/upload';
-      const annoteUrl = 'https://vision-to-graph.appspot.com/api/vision';
+      const annotateUrl = 'https://vision-to-graph.appspot.com/api/vision';
 
       const formData = new FormData();
       formData.append('image', this.state.image)
@@ -80,9 +79,9 @@ class App extends Component {
       });
 
       const {data: visionLabels} = await axios({
-        url: annoteUrl,
+        url: annotateUrl,
         method: 'POST', 
-        body: publicImageUrl
+        body: {publicImageUrl}
       })
 
       this.setState({publicImageUrl, visionLabels})

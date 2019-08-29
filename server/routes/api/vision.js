@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const dotenv = require('dotenv');
-const dotenv = require('dotenv');
 const Multer = require('multer');
 const {Storage} = require('@google-cloud/storage');
 const vision = require('@google-cloud/vision');
@@ -11,7 +10,7 @@ dotenv.config();
 // Instantiate a storage client
 const storage = new Storage();
 // Create bucket/container for objects/files.
-const bucket = storage.bucket(process.env.GCLOUD_STORAGE_BUCKET); //specified in `app.yaml` not `.env`
+const bucket = storage.bucket(process.env.GCLOUD_STORAGE_BUCKET); //specified in `app.yaml` && `.env`
 
 // Multer processes multipart/form-data uploads, temporarily saves to specified 'storage' 
 //(e.g., memoryStorage or given path), and makes files available via `req.files`.
@@ -25,7 +24,7 @@ const multer = Multer({
 // Handle post to `/api/vision/upload`
 router.post('/upload', multer.single('file'), (req, res, next) => {
   if (!req.file) {
-    res.status(400).send('No file uploaded.');
+    res.status(400).send('No file uploaded.' + String(Object.keys(req)));
     return;
   }
 
@@ -50,7 +49,7 @@ router.post('/upload', multer.single('file'), (req, res, next) => {
 });
 
 // Get labels for public image url
-async function getImageAnnotations(publicImgUrl) {
+async function getImageAnnotations(publicImageUrl) {
   // Create a client
   // If running on Google App Engine, Application Default Credentials apply
   const client = new vision.ImageAnnotatorClient({
@@ -62,7 +61,7 @@ async function getImageAnnotations(publicImgUrl) {
   })
 
   // Perform WEB_DETECTION on image
-  const [result] = await client.webDetection(publicImgUrl);
+  const [result] = await client.webDetection(publicImageUrl);
   const bestGuessLabel = result.webDetection.bestGuessLabels[0].label;
   const labels = [bestGuessLabel[0].toUpperCase() + bestGuessLabel.slice(1)]
   result.webDetection.webEntities.forEach(webEnt => {
@@ -73,10 +72,10 @@ async function getImageAnnotations(publicImgUrl) {
 };
 
 // Handle GET to `/api/vision`
-router.get('/', async (req, res, next) => {
+router.post('/', async (req, res, next) => {
   try{
     // const labels = await getImageAnnotations("http://images-gmi-pmc.edge-generalmills.com/df111eed-4d6a-44f7-8d8f-80d41f7ee1d6.jpg");
-    const label = await getImageAnnotations(req.file);
+    const labels = await getImageAnnotations(req.body.publicImageUrl);
     res.send(labels);
   }
   catch(err){
