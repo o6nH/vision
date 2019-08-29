@@ -39,6 +39,7 @@ class App extends Component {
     this.state = {
       image: {},
       imageBase64Data: '',
+      publicImageUrl: '',
       visionLabels: []
     };
   }
@@ -62,13 +63,14 @@ class App extends Component {
 
   submitToGoogle = async () => {
     try {
-      const url = 'https://vision-to-graph.appspot.com/api/vision';
+      const uploadUrl = 'https://vision-to-graph.appspot.com/api/vision/upload';
+      const annoteUrl = 'https://vision-to-graph.appspot.com/api/vision';
 
       const formData = new FormData();
       formData.append('image', this.state.image)
       
-      let {data} = await axios({
-        url,
+      const {data: publicImageUrl} = await axios({
+        url: uploadUrl,
         method: 'POST',
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -77,7 +79,13 @@ class App extends Component {
         body: formData
       });
 
-      this.setState({visionLabels: data})
+      const {data: visionLabels} = await axios({
+        url: annoteUrl,
+        method: 'POST', 
+        body: publicImageUrl
+      })
+
+      this.setState({publicImageUrl, visionLabels})
 
     } catch (err) {
       console.error(err);

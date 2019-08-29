@@ -90,13 +90,19 @@ npm i dotenv
 
 ```txt
 <!-- .env -->
+<!-- from GOOGLE_APPLICATION_CREDENTIALS in service account file (/config/env.js) -->
 PROJECT_ID=...
 PRIVATE_KEY=...
 CLIENT_EMAIL=...
 ```
 
 ```javascript
-require('dotenv').config() //allowing use of process.env._____ when the `.env` is available or `env_variables: [envName]:[envVal]`
+require('dotenv').config() //allows use of process.env._____ when the `.env` is available
+```
+
+```yaml
+env_variables:
+  GCLOUD_STORAGE_BUCKET: vision-img
 ```
 
 # Google APIs
