@@ -1,5 +1,6 @@
 const router = require('express').Router();
-const env = require('../../../config/env');
+const path = require('path');
+const env = require(path.join(__dirname, '../../../config/env'));
 
 async function getImageAnnotations(imgUri) {
   // Imports the Google Cloud client library
